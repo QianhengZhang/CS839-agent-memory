@@ -1,7 +1,6 @@
 # CS 839 HW1: Continual learning through agent memory
 
 An agent answers 12 GIS tasks in order. We compare no memory, episodic memory and structured memory.
-Design doc (agent and memory): [proposal](https://claude.ai/code/artifact/52cd4132-37d1-4ce1-9f8b-b7d7270594f1).
 
 ```
 hw1.ipynb            the experiment (currently the no-memory condition)
@@ -24,7 +23,7 @@ pip install -r requirements.txt
 python utils/test_tasks.py     # should end with ALL PASS
 ```
 
-Then open `hw1.ipynb`. It asks for the team API key and uses `gpt-5.6-luna`.
+Then open `hw1_no_memory.ipynb`. It asks for the team API key and uses `gpt-5.6-luna`.
 
 ## Data
 
