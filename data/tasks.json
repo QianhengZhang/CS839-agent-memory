@@ -1,0 +1,1119 @@
+{
+  "data": "us_states_popest2025.geojson: TIGER/Line 2025 state boundaries (56 rows) joined with Census Bureau NST-EST2025-POP (Vintage 2025 estimates, released Jan 2026). Population = July 1, 2025 estimate; null for Guam, USVI, American Samoa, CNMI.",
+  "scenario": "You are a GIS analyst at a national nonprofit. Colleagues send short data requests for reports, memos and grant work. Answer each one with the dataset and tools.",
+  "system_prompt_definitions": "Use only the provided data and tools. Area means the area of a region's boundary in the dataset, in km². Population means the Census Bureau's estimate for July 1, 2025. Population density means population divided by area, in people per km².",
+  "rules": {
+    "A": "'States' means the 50 states. The dataset also has DC, Puerto Rico and 4 island territories.",
+    "B": "get_area defaults to EPSG:3857, which inflates area. Use EPSG:5070 for area. Exception: long distances should be geodesic."
+  },
+  "task_groups": {
+    "no_trap": [
+      "T1",
+      "T3"
+    ],
+    "learn": [
+      "T2",
+      "T4"
+    ],
+    "reuse": [
+      "T5",
+      "T6",
+      "T7"
+    ],
+    "exception": [
+      "T8",
+      "T9"
+    ],
+    "return_or_combine": [
+      "T10",
+      "T11",
+      "T12"
+    ]
+  },
+  "tools": [
+    {
+      "name": "list_regions",
+      "description": "List every row in the dataset (U.S. states and other areas). Returns [{name, code}].",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_population",
+      "description": "Census Bureau population estimate for July 1, 2025. The value is null for regions the source does not cover. Returns {\"count\", \"total\", \"rows\"}: count and total are over the returned rows. Rows without a value are left out when greater_than, less_than or order is used.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "description": "List of region names exactly as list_regions returns them, or the string \"all\" for every row.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "all"
+                ]
+              }
+            ]
+          },
+          "greater_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly greater than this (people)."
+          },
+          "less_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly less than this (people)."
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "description": "Sort rows by value, ascending or descending."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Return at most this many rows, after sorting."
+          }
+        },
+        "required": [
+          "names"
+        ]
+      }
+    },
+    {
+      "name": "get_area",
+      "description": "Area in km² of each region's boundary. The boundary includes inland and coastal water inside the state line. Area is measured in the given map projection; default EPSG:3857. Returns {\"count\", \"total\", \"rows\"}: count and total are over the returned rows. Rows without a value are left out when greater_than, less_than or order is used.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "description": "List of region names exactly as list_regions returns them, or the string \"all\" for every row.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "all"
+                ]
+              }
+            ]
+          },
+          "projection": {
+            "type": "string",
+            "enum": [
+              "EPSG:3857",
+              "EPSG:5070"
+            ],
+            "default": "EPSG:3857",
+            "description": "EPSG:3857 (Web Mercator) or EPSG:5070 (Albers Equal Area Conic, USA). Default: EPSG:3857."
+          },
+          "greater_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly greater than this (km²)."
+          },
+          "less_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly less than this (km²)."
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "description": "Sort rows by value, ascending or descending."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Return at most this many rows, after sorting."
+          }
+        },
+        "required": [
+          "names"
+        ]
+      }
+    },
+    {
+      "name": "get_density",
+      "description": "Population density in people per km²: the population estimate divided by the area of the boundary, with area measured in the given map projection; default EPSG:3857. Returns {\"count\", \"total\", \"rows\"}: count and total are over the returned rows. Rows without a value are left out when greater_than, less_than or order is used.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "description": "List of region names exactly as list_regions returns them, or the string \"all\" for every row.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "all"
+                ]
+              }
+            ]
+          },
+          "projection": {
+            "type": "string",
+            "enum": [
+              "EPSG:3857",
+              "EPSG:5070"
+            ],
+            "default": "EPSG:3857",
+            "description": "EPSG:3857 (Web Mercator) or EPSG:5070 (Albers Equal Area Conic, USA). Default: EPSG:3857."
+          },
+          "greater_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly greater than this (people per km²)."
+          },
+          "less_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly less than this (people per km²)."
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "description": "Sort rows by value, ascending or descending."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Return at most this many rows, after sorting."
+          }
+        },
+        "required": [
+          "names"
+        ]
+      }
+    },
+    {
+      "name": "get_centroid",
+      "description": "Centroid of a region's boundary as {lon, lat} in degrees.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    {
+      "name": "distance",
+      "description": "Distance in km from the centroid of one region to the centroids of others (the region itself is skipped). method=\"planar\" measures a straight line in the given projection; method=\"geodesic\" measures along the earth's surface and ignores projection. Defaults: method=planar, projection=EPSG:3857. Returns {\"count\", \"total\", \"rows\"}: count and total are over the returned rows. Rows without a value are left out when greater_than, less_than or order is used.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "from_name": {
+            "type": "string"
+          },
+          "to_names": {
+            "description": "List of region names exactly as list_regions returns them, or the string \"all\" for every row.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "all"
+                ]
+              }
+            ]
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "planar",
+              "geodesic"
+            ],
+            "default": "planar"
+          },
+          "projection": {
+            "type": "string",
+            "enum": [
+              "EPSG:3857",
+              "EPSG:5070"
+            ],
+            "default": "EPSG:3857",
+            "description": "EPSG:3857 (Web Mercator) or EPSG:5070 (Albers Equal Area Conic, USA). Default: EPSG:3857."
+          },
+          "greater_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly greater than this (km)."
+          },
+          "less_than": {
+            "type": "number",
+            "description": "Keep only rows whose value is strictly less than this (km)."
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "description": "Sort rows by value, ascending or descending."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Return at most this many rows, after sorting."
+          }
+        },
+        "required": [
+          "from_name",
+          "to_names"
+        ]
+      }
+    },
+    {
+      "name": "rank",
+      "description": "Sort a {name: number} object. Entries with null values are left out. Returns [[name, value], ...].",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc"
+          },
+          "k": {
+            "type": "integer",
+            "description": "Return only the first k entries."
+          }
+        },
+        "required": [
+          "values"
+        ]
+      }
+    },
+    {
+      "name": "calculator",
+      "description": "Evaluate an arithmetic expression with numbers and + - * / ** ( ).",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expression"
+        ]
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "type": "warm-up",
+      "rules": [],
+      "question": "Our annual report opens with the most populous state. Which state is it, and what was its population in 2025?",
+      "tools_needed": [
+        "list_regions",
+        "get_population",
+        "rank"
+      ],
+      "answer": [
+        "California",
+        39355309
+      ],
+      "grading": "State name and population exact.",
+      "failure_conditions": [],
+      "reference_calls": [
+        [
+          "get_population",
+          {
+            "names": "<50 states>",
+            "order": "desc",
+            "limit": 1
+          }
+        ]
+      ],
+      "answer_format": "{\"state\": \"<name>\", \"population\": <integer>}",
+      "pilot_no_memory": "4/4"
+    },
+    {
+      "id": "T2",
+      "type": "learn",
+      "rules": [
+        "B"
+      ],
+      "question": "A draft slide says the most populous state is also the largest state by area. Is that right? Give the area in km² of both states.",
+      "tools_needed": [
+        "list_regions",
+        "get_population",
+        "rank",
+        "get_area"
+      ],
+      "answer": {
+        "same_state": false,
+        "areas_km2": {
+          "California": 423965.1,
+          "Alaska": 1724220.5
+        }
+      },
+      "grading": "Yes/no exact; each area within 2%.",
+      "failure_conditions": [
+        {
+          "answer": {
+            "same_state": false,
+            "areas_km2": {
+              "California": 671890.1,
+              "Alaska": 9016848.4
+            }
+          },
+          "cause": "Default projection EPSG:3857 (rule B). The yes/no part is still right."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_population",
+          {
+            "names": "<50 states>",
+            "order": "desc",
+            "limit": 1
+          }
+        ],
+        [
+          "get_area",
+          {
+            "names": "<50 states>",
+            "projection": "EPSG:5070",
+            "order": "desc",
+            "limit": 1
+          }
+        ],
+        [
+          "get_area",
+          {
+            "names": [
+              "California",
+              "Alaska"
+            ],
+            "projection": "EPSG:5070"
+          }
+        ]
+      ],
+      "answer_format": "{\"same_state\": <true or false>, \"areas_km2\": {\"<state>\": <number>, \"<state>\": <number>}}",
+      "pilot_no_memory": "0/4"
+    },
+    {
+      "id": "T3",
+      "type": "warm-up",
+      "rules": [],
+      "question": "For the Wisconsin state brief: how many states had more people than Wisconsin in 2025?",
+      "tools_needed": [
+        "list_regions",
+        "get_population"
+      ],
+      "answer": 20,
+      "grading": "Exact.",
+      "failure_conditions": [],
+      "reference_calls": [
+        [
+          "get_population",
+          {
+            "names": [
+              "Wisconsin"
+            ]
+          }
+        ],
+        [
+          "get_population",
+          {
+            "names": "<50 states>",
+            "greater_than": 5972787
+          }
+        ]
+      ],
+      "answer_format": "{\"count\": <integer>}",
+      "pilot_no_memory": "4/4"
+    },
+    {
+      "id": "T4",
+      "type": "learn",
+      "rules": [
+        "A"
+      ],
+      "question": "A federal pilot program is open only to states with fewer people than Wisconsin in 2025. How many states are eligible?",
+      "tools_needed": [
+        "list_regions",
+        "get_population"
+      ],
+      "answer": 29,
+      "grading": "Exact.",
+      "failure_conditions": [
+        {
+          "answer": 31,
+          "cause": "Counted every row with a population, including DC and Puerto Rico (rule A)."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_population",
+          {
+            "names": [
+              "Wisconsin"
+            ]
+          }
+        ],
+        [
+          "get_population",
+          {
+            "names": "<50 states>",
+            "less_than": 5972787
+          }
+        ]
+      ],
+      "answer_format": "{\"count\": <integer>}",
+      "pilot_no_memory": "4/4"
+    },
+    {
+      "id": "T5",
+      "type": "reuse",
+      "rules": [
+        "B"
+      ],
+      "question": "A rural health program targets the 5 least densely populated states. List them with their densities in people per km².",
+      "tools_needed": [
+        "list_regions",
+        "get_area",
+        "get_population",
+        "calculator",
+        "rank"
+      ],
+      "answer": [
+        [
+          "Alaska",
+          0.43
+        ],
+        [
+          "Wyoming",
+          2.32
+        ],
+        [
+          "Montana",
+          3.01
+        ],
+        [
+          "North Dakota",
+          4.37
+        ],
+        [
+          "South Dakota",
+          4.68
+        ]
+      ],
+      "grading": "Same 5 states in the same order; each density within 2%.",
+      "failure_conditions": [
+        {
+          "answer": [
+            [
+              "Alaska",
+              0.08
+            ],
+            [
+              "Wyoming",
+              1.24
+            ],
+            [
+              "Montana",
+              1.4
+            ],
+            [
+              "North Dakota",
+              2.0
+            ],
+            [
+              "South Dakota",
+              2.39
+            ]
+          ],
+          "cause": "Default projection EPSG:3857 (rule B)."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_density",
+          {
+            "names": "<50 states>",
+            "projection": "EPSG:5070",
+            "order": "asc",
+            "limit": 5
+          }
+        ]
+      ],
+      "answer_format": "{\"states\": [[\"<state>\", <people_per_km2>], ...]}  (5 entries, lowest first)",
+      "pilot_no_memory": "3/4"
+    },
+    {
+      "id": "T6",
+      "type": "reuse",
+      "rules": [
+        "A",
+        "B"
+      ],
+      "question": "A small-states grant covers the 5 states with the smallest area. List them with their areas in km².",
+      "tools_needed": [
+        "list_regions",
+        "get_area",
+        "rank"
+      ],
+      "answer": [
+        [
+          "Rhode Island",
+          4001.5
+        ],
+        [
+          "Delaware",
+          6445.9
+        ],
+        [
+          "Connecticut",
+          14358.1
+        ],
+        [
+          "New Jersey",
+          22582.6
+        ],
+        [
+          "New Hampshire",
+          24216.1
+        ]
+      ],
+      "grading": "Same 5 states in the same order; each area within 2%.",
+      "failure_conditions": [
+        {
+          "answer": [
+            [
+              "District of Columbia",
+              177.0
+            ],
+            [
+              "Guam",
+              1477.9
+            ],
+            [
+              "American Samoa",
+              1505.0
+            ],
+            [
+              "United States Virgin Islands",
+              1898.3
+            ],
+            [
+              "Rhode Island",
+              4001.5
+            ]
+          ],
+          "cause": "Included DC and territories (rule A)."
+        },
+        {
+          "answer": [
+            [
+              "Rhode Island",
+              7160.5
+            ],
+            [
+              "Delaware",
+              10687.1
+            ],
+            [
+              "Connecticut",
+              25678.2
+            ],
+            [
+              "Hawaii",
+              32806.6
+            ],
+            [
+              "New Jersey",
+              38659.7
+            ]
+          ],
+          "cause": "Default projection EPSG:3857 (rule B)."
+        },
+        {
+          "answer": [
+            [
+              "Rhode Island",
+              7160.5
+            ],
+            [
+              "Delaware",
+              10687.1
+            ],
+            [
+              "Connecticut",
+              25678.2
+            ],
+            [
+              "New Jersey",
+              38659.7
+            ],
+            [
+              "New Hampshire",
+              46326.4
+            ]
+          ],
+          "cause": "Right states, but areas from the default projection EPSG:3857 (rule B)."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_area",
+          {
+            "names": "<50 states>",
+            "projection": "EPSG:5070",
+            "order": "asc",
+            "limit": 5
+          }
+        ]
+      ],
+      "answer_format": "{\"states\": [[\"<state>\", <area_km2>], ...]}  (5 entries, smallest first)",
+      "pilot_no_memory": "0/4"
+    },
+    {
+      "id": "T7",
+      "type": "reuse",
+      "rules": [
+        "A",
+        "B"
+      ],
+      "question": "A transit funding memo needs the 5 most densely populated states. List them with their densities in people per km².",
+      "tools_needed": [
+        "list_regions",
+        "get_area",
+        "get_population",
+        "calculator",
+        "rank"
+      ],
+      "answer": [
+        [
+          "New Jersey",
+          422.8
+        ],
+        [
+          "Rhode Island",
+          278.5
+        ],
+        [
+          "Massachusetts",
+          261.7
+        ],
+        [
+          "Connecticut",
+          256.9
+        ],
+        [
+          "Maryland",
+          195.0
+        ]
+      ],
+      "grading": "Same 5 states in the same order; each density within 2%.",
+      "failure_conditions": [
+        {
+          "answer": [
+            [
+              "District of Columbia",
+              3918.3
+            ],
+            [
+              "New Jersey",
+              422.8
+            ],
+            [
+              "Rhode Island",
+              278.5
+            ],
+            [
+              "Massachusetts",
+              261.7
+            ],
+            [
+              "Connecticut",
+              256.9
+            ]
+          ],
+          "cause": "Included DC and Puerto Rico (rule A)."
+        },
+        {
+          "answer": [
+            [
+              "New Jersey",
+              247.0
+            ],
+            [
+              "Rhode Island",
+              155.7
+            ],
+            [
+              "Massachusetts",
+              143.7
+            ],
+            [
+              "Connecticut",
+              143.6
+            ],
+            [
+              "Maryland",
+              117.8
+            ]
+          ],
+          "cause": "Default projection EPSG:3857 (rule B)."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_density",
+          {
+            "names": "<50 states>",
+            "projection": "EPSG:5070",
+            "order": "desc",
+            "limit": 5
+          }
+        ]
+      ],
+      "answer_format": "{\"states\": [[\"<state>\", <people_per_km2>], ...]}  (5 entries, highest first)",
+      "pilot_no_memory": "0/4"
+    },
+    {
+      "id": "T8",
+      "type": "exception",
+      "rules": [
+        "A (exception)"
+      ],
+      "question": "The report's headline figure is the population of the United States in the Census Bureau's 2025 estimates. What is it?",
+      "tools_needed": [
+        "list_regions",
+        "get_population",
+        "calculator"
+      ],
+      "answer": 341784857,
+      "grading": "Exact. The Census Bureau's United States total = 50 states + DC (no Puerto Rico).",
+      "failure_conditions": [
+        {
+          "answer": 341091212,
+          "cause": "Excluded DC by applying rule A where it does not hold."
+        },
+        {
+          "answer": 344969692,
+          "cause": "Summed every row with a population, including Puerto Rico."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_population",
+          {
+            "names": "<50 states + DC>"
+          }
+        ]
+      ],
+      "answer_format": "{\"population\": <integer>}",
+      "pilot_no_memory": "4/4"
+    },
+    {
+      "id": "T9",
+      "type": "exception",
+      "rules": [
+        "B (exception)"
+      ],
+      "question": "A map caption needs the distance in km between the centroids of Alaska and Maine. What is it?",
+      "tools_needed": [
+        "distance"
+      ],
+      "answer": 5350.4,
+      "grading": "Within 2%. Long distances are measured on the earth's surface (geodesic).",
+      "failure_conditions": [
+        {
+          "answer": 5801.0,
+          "cause": "Planar distance in EPSG:5070: applied rule B (equal-area for area) to distance."
+        },
+        {
+          "answer": 9942.2,
+          "cause": "Default planar distance in EPSG:3857."
+        }
+      ],
+      "reference_calls": [
+        [
+          "distance",
+          {
+            "from_name": "Alaska",
+            "to_names": [
+              "Maine"
+            ],
+            "method": "geodesic"
+          }
+        ]
+      ],
+      "answer_format": "{\"distance_km\": <number>}",
+      "pilot_no_memory": "3/4"
+    },
+    {
+      "id": "T10",
+      "type": "return",
+      "rules": [
+        "A"
+      ],
+      "question": "A memo on small-population states needs the 5 states with the fewest people in 2025. List them with their populations.",
+      "tools_needed": [
+        "list_regions",
+        "get_population",
+        "rank"
+      ],
+      "answer": [
+        [
+          "Wyoming",
+          588753
+        ],
+        [
+          "Vermont",
+          644663
+        ],
+        [
+          "Alaska",
+          737270
+        ],
+        [
+          "North Dakota",
+          799358
+        ],
+        [
+          "South Dakota",
+          935094
+        ]
+      ],
+      "grading": "Same 5 states in the same order; populations exact.",
+      "failure_conditions": [
+        {
+          "answer": [
+            [
+              "Wyoming",
+              588753
+            ],
+            [
+              "Vermont",
+              644663
+            ],
+            [
+              "District of Columbia",
+              693645
+            ],
+            [
+              "Alaska",
+              737270
+            ],
+            [
+              "North Dakota",
+              799358
+            ]
+          ],
+          "cause": "Included DC: rule A not applied, or the T8 exception carried over to a states-only question."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_population",
+          {
+            "names": "<50 states>",
+            "order": "asc",
+            "limit": 5
+          }
+        ]
+      ],
+      "answer_format": "{\"states\": [[\"<state>\", <population>], ...]}  (5 entries, fewest first)",
+      "pilot_no_memory": "3/4"
+    },
+    {
+      "id": "T11",
+      "type": "combine",
+      "rules": [
+        "B (exception)"
+      ],
+      "question": "A new regional office in Wisconsin will serve every state whose centroid is within 800 km of Wisconsin's centroid. Which states does it serve, and what is the 2025 population of Wisconsin plus those states?",
+      "tools_needed": [
+        "list_regions",
+        "distance",
+        "get_population",
+        "calculator"
+      ],
+      "answer": {
+        "states": [
+          "Illinois",
+          "Indiana",
+          "Iowa",
+          "Michigan",
+          "Minnesota",
+          "Missouri",
+          "Ohio"
+        ],
+        "total_population": 63032988
+      },
+      "grading": "State set exact; total exact.",
+      "planar_5070_same_set": true,
+      "failure_conditions": [
+        {
+          "answer": {
+            "states": [
+              "Illinois",
+              "Iowa",
+              "Michigan",
+              "Minnesota"
+            ],
+            "total_population": 37888604
+          },
+          "cause": "Default planar distance in EPSG:3857: distances inflated, states missed."
+        }
+      ],
+      "reference_calls": [
+        [
+          "distance",
+          {
+            "from_name": "Wisconsin",
+            "to_names": "<50 states>",
+            "method": "geodesic",
+            "less_than": 800
+          }
+        ],
+        [
+          "get_population",
+          {
+            "names": [
+              "Illinois",
+              "Indiana",
+              "Iowa",
+              "Michigan",
+              "Minnesota",
+              "Missouri",
+              "Ohio",
+              "Wisconsin"
+            ]
+          }
+        ]
+      ],
+      "answer_format": "{\"states\": [\"<state>\", ...], \"total_population\": <integer>}  (states without Wisconsin)",
+      "pilot_no_memory": "3/4"
+    },
+    {
+      "id": "T12",
+      "type": "return",
+      "rules": [
+        "A",
+        "B"
+      ],
+      "question": "A funding formula gives extra weight to states whose population density is more than twice the overall density of the 50 states (their total population divided by their total area). How many states get the extra weight?",
+      "tools_needed": [
+        "list_regions",
+        "get_area",
+        "get_population",
+        "calculator"
+      ],
+      "answer": {
+        "overall_density": 34.63,
+        "count": 16,
+        "states": [
+          "California",
+          "Connecticut",
+          "Delaware",
+          "Florida",
+          "Georgia",
+          "Illinois",
+          "Indiana",
+          "Maryland",
+          "Massachusetts",
+          "New Jersey",
+          "New York",
+          "North Carolina",
+          "Ohio",
+          "Pennsylvania",
+          "Rhode Island",
+          "Virginia"
+        ]
+      },
+      "grading": "Count exact; overall density within 2%.",
+      "failure_conditions": [
+        {
+          "answer": {
+            "overall_density": 14.93,
+            "count": 21
+          },
+          "cause": "Default projection EPSG:3857 for area (rule B not reapplied after T9)."
+        },
+        {
+          "answer": {
+            "overall_density": 34.98,
+            "count": 18
+          },
+          "cause": "Used every row with a population, including DC and Puerto Rico (rule A)."
+        }
+      ],
+      "reference_calls": [
+        [
+          "get_population",
+          {
+            "names": "<50 states>"
+          }
+        ],
+        [
+          "get_area",
+          {
+            "names": "<50 states>",
+            "projection": "EPSG:5070"
+          }
+        ],
+        [
+          "calculator",
+          {
+            "expression": "2 * 341091212 / 9848988.8"
+          }
+        ],
+        [
+          "get_density",
+          {
+            "names": "<50 states>",
+            "projection": "EPSG:5070",
+            "greater_than": 69.26
+          }
+        ]
+      ],
+      "answer_format": "{\"count\": <integer>, \"overall_density\": <number>}",
+      "pilot_no_memory": "3/4"
+    }
+  ]
+}
