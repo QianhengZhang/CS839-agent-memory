@@ -3,7 +3,8 @@
 An agent answers 12 GIS tasks in order. We compare no memory, episodic memory and structured memory.
 
 ```
-hw1.ipynb            the experiment (currently the no-memory condition)
+hw1_no_memory.ipynb  the no-memory condition on its own
+hw1_memory.ipynb     the full experiment: no memory, episodic and structured memory, results
 data/
   tasks.json         12 tasks: question, answer format, answer, known mistakes, pilot results
   us_states_popest2025.geojson
@@ -12,6 +13,12 @@ utils/
   grader.py          grade(task, reply_text)
   build_tasks.py     regenerates data/tasks.json (only if a task changes)
   test_tasks.py      checks every task without API calls
+  agent.py           the agent loop of hw1_no_memory.ipynb, plus a memory hook
+  memory.py          the three memory conditions
+  experiment.py      runs the sequences and saves one JSON file per (condition, run)
+  test_memory.py     checks the memory code with a stub client, without API calls
+runs/                saved traces (memory_smoke/, memory_main/)
+results/, figures/   tables and plots made by hw1_memory.ipynb
 ```
 
 ## Setup
@@ -19,11 +26,13 @@ utils/
 From this folder:
 
 ```
-pip install -r requirements.txt
+pip install -r requirements.txt matplotlib
 python utils/test_tasks.py     # should end with ALL PASS
+python utils/test_memory.py    # should end with ALL PASS
 ```
 
-Then open `hw1_no_memory.ipynb`. It asks for the team API key and uses `gpt-5.6-luna`.
+Then open `hw1_memory.ipynb` (or `hw1_no_memory.ipynb`). It reads `OPENAI_API_KEY` from a `.env` file in this
+folder or a parent folder, or asks for the team API key, and uses `gpt-5.6-luna`.
 
 ## Data
 
@@ -41,3 +50,12 @@ Boundaries include water inside the state line.
 - One run = T1 to T12 in order. Clear memory at the start of each run.
 - 5 runs per condition, conditions interleaved. Re-run no memory too.
 - Never show `reference_calls` from `tasks.json` to the agent.
+- Feedback is binary: after each task the memory learns only whether the answer was correct.
+
+`hw1_memory.ipynb` runs everything; the same runs from the command line:
+
+```
+python -m utils.experiment --out runs/memory_main --runs 1-5
+```
+
+Finished (condition, run) files are skipped, so an interrupted experiment resumes.
