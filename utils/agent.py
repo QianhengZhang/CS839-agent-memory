@@ -154,9 +154,11 @@ def describe_names(names):
         return json.dumps(names, ensure_ascii=False)
     chosen = set(names)
     left_out = [n for n in ALL_ROWS if n not in chosen]
-    unknown = [n for n in names if n not in ALL_ROWS]
+    repeated = sorted({n for n in names if names.count(n) > 1})
+    unknown = sorted({n for n in names if n not in ALL_ROWS})
     text = f"<{len(names)} names: the {len(ALL_ROWS)} dataset rows"
     text += f" except {', '.join(left_out)}" if left_out else ""
+    text += f"; repeated {', '.join(repeated)}" if repeated else ""
     text += f"; unknown names {unknown}" if unknown else ""
     return text + ">"
 

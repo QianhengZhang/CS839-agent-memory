@@ -283,18 +283,18 @@ class StructuredMemory:
         usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0}
         messages = [{"role": "user", "content": request}]
         info = {"request": request, "changes": [], "problems": [], "budget_truncated": False}
-        records = None
+        records = None  # the latest reply that parsed; an over-budget one is truncated below
         for attempt in range(2):
             reply = self._call_writer(messages, usage)
             try:
-                records, changes = parse_writer_reply(reply)
+                parsed, changes = parse_writer_reply(reply)
             except (ValueError, json.JSONDecodeError) as exc:
                 info["problems"].append(f"unparseable reply: {exc}")
                 messages += [{"role": "assistant", "content": reply or ""},
                              {"role": "user", "content": f"That reply could not be parsed ({exc}). "
                                                          "Return only the JSON object."}]
-                records = None
                 continue
+            records = parsed
             info["changes"] = changes
             n, words = len(records), memory_words(records)
             if n <= self.max_records and words <= self.max_words:

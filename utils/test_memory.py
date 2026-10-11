@@ -98,6 +98,10 @@ def test_compact_trace():
     ok &= check("names: 50 states listed by what was left out",
                 d.startswith("<50 names: the 56 dataset rows except ") and "District of Columbia" in d, d)
     ok &= check("names: short lists written out", describe_names(["Wisconsin"]) == '["Wisconsin"]')
+    d = describe_names(S50 + ["Texas"])
+    ok &= check("names: repeated names reported", d.startswith("<51 names") and "repeated Texas" in d, d)
+    d = describe_names(S50[:49] + ["Atlantis"])
+    ok &= check("names: unknown names reported", "unknown names ['Atlantis']" in d and S50[49] in d, d)
     text = compact_trace(T["T6"]["question"], fake_trace(T["T6"])["calls"], '{"states": []}')
     ok &= check("compact trace shows the projection argument", 'projection="EPSG:5070"' in text, text)
     ok &= check("compact trace: no step limit message when answered", "step limit" not in text)
@@ -166,6 +170,12 @@ def test_structured():
     info = mem.update(task, trace, correct=True)
     ok &= check("structured: over budget re-prompts once", len(client.requests) == 2)
     ok &= check("structured: then truncates to 8 records", len(mem.snapshot()) == 8 and info["budget_truncated"])
+
+    client = StubClient([writer_reply(big), "not json"])
+    mem = StructuredMemory(client, "stub", inst)
+    info = mem.update(task, trace, correct=True)
+    ok &= check("structured: over budget then unparseable keeps the first reply, truncated",
+                len(mem.snapshot()) == 8 and info["budget_truncated"])
 
     client = StubClient(["not json", "still not json"])
     mem = StructuredMemory(client, "stub", inst)
