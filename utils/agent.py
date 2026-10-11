@@ -146,11 +146,16 @@ def task_cost(trace):
 
 # ---------- compact trace: what the memory systems store ----------
 
+def _raw(value, limit=200):
+    text = json.dumps(value, ensure_ascii=False, default=str)
+    return text if len(text) <= limit else text[:limit] + "..."
+
+
 def describe_names(names):
     """Short, neutral description of a names / to_names argument (lists of 50+ names are common)."""
-    if not isinstance(names, list):
-        return json.dumps(names, ensure_ascii=False)
-    if len(names) <= 12:
+    if isinstance(names, list) and not all(isinstance(n, str) for n in names):
+        return _raw(names)  # malformed: the tool call itself fails
+    if not isinstance(names, list) or len(names) <= 12:
         return json.dumps(names, ensure_ascii=False)
     chosen = set(names)
     left_out = [n for n in ALL_ROWS if n not in chosen]
@@ -164,12 +169,14 @@ def describe_names(names):
 
 
 def format_args(arguments):
+    if not isinstance(arguments, dict):  # the model can send any JSON; the tool call itself fails
+        return _raw(arguments)
     parts = []
     for key, value in arguments.items():
         if key in ("names", "to_names"):
             parts.append(f"{key}={describe_names(value)}")
         elif key == "values" and isinstance(value, dict) and len(value) > 12:
-            parts.append(f"values=<dict over {describe_names(list(value))[1:-1]}>")
+            parts.append(f"values=<dict over {describe_names(list(value)).strip('<>')}>")
         else:
             parts.append(f"{key}={json.dumps(value, ensure_ascii=False)}")
     return ", ".join(parts)

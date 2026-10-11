@@ -102,6 +102,15 @@ def test_compact_trace():
     ok &= check("names: repeated names reported", d.startswith("<51 names") and "repeated Texas" in d, d)
     d = describe_names(S50[:49] + ["Atlantis"])
     ok &= check("names: unknown names reported", "unknown names ['Atlantis']" in d and S50[49] in d, d)
+    malformed = [{"step": 1, "name": "get_area", "arguments": {"names": [{"name": "Ohio", "code": "OH"}] * 13},
+                  "result": '{"ok": false}'},
+                 {"step": 2, "name": "get_area", "arguments": ["not", "an", "object"], "result": '{"ok": false}'},
+                 {"step": 3, "name": "get_area", "arguments": {"names": [1] * 13}, "result": '{"ok": false}'}]
+    try:
+        compact_trace("q", malformed, None)
+        ok &= check("compact trace survives malformed tool arguments", True)
+    except Exception as exc:
+        ok &= check("compact trace survives malformed tool arguments", False, f"{type(exc).__name__}: {exc}")
     text = compact_trace(T["T6"]["question"], fake_trace(T["T6"])["calls"], '{"states": []}')
     ok &= check("compact trace shows the projection argument", 'projection="EPSG:5070"' in text, text)
     ok &= check("compact trace: no step limit message when answered", "step limit" not in text)
@@ -195,6 +204,23 @@ def test_structured():
     return ok
 
 
+def test_failed_sequence():
+    import tempfile
+
+    from utils.experiment import load_traces, run_all, spent_usd
+    client = StubClient(['{"state": "California", "population": 39355309}', RuntimeError("API down")])
+    with tempfile.TemporaryDirectory() as tmp:
+        errors = run_all(client, "stub", SPEC, tmp, runs=[1], conditions=("none",), task_ids=["T1", "T2"],
+                         workers=1, log=lambda s: None)
+        failed = list((Path(tmp) / "failed").glob("*.json"))
+        ok = check("failed sequence: reported, and not loaded as a finished run",
+                   len(errors) == 1 and load_traces(tmp) == [])
+        ok &= check("failed sequence: answered tasks kept in failed/ and counted in the budget",
+                    len(failed) == 1 and spent_usd(tmp) > 0)
+    return ok
+
+
 if __name__ == "__main__":
-    results = [test_compact_trace(), test_no_memory_prompt_unchanged(), test_episodic(), test_structured()]
+    results = [test_compact_trace(), test_no_memory_prompt_unchanged(), test_episodic(), test_structured(),
+               test_failed_sequence()]
     print("\nALL PASS" if all(results) else "\nFAILURES ABOVE")

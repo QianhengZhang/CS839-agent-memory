@@ -58,21 +58,24 @@ def trace_cost(trace):
     return task_cost(trace) + trace.get("memory_update", {}).get("memory_cost", 0.0)
 
 
-def run_sequence(client, model, spec, condition, run, task_ids=None, verbose=False, log=print):
-    """One run: fresh memory, then the tasks in order. Returns the list of traces."""
+def run_sequence(client, model, spec, condition, run, task_ids=None, verbose=False, log=print, traces=None):
+    """One run: fresh memory, then the tasks in order. Appends each trace to `traces` and returns it.
+
+    A trace is appended as soon as its task is answered, so if the sequence fails part-way the
+    caller still has every answered task and its cost.
+    """
     instructions = base_instructions(spec)
     memory = make_memory(condition, client, model, instructions)
-    traces = []
+    traces = [] if traces is None else traces
     for task in spec["tasks"]:
         if task_ids and task["id"] not in task_ids:
             continue
         memory_text = memory.context_for(task)
         retrieved = list(getattr(memory, "last_retrieved", []))
         trace = run_task(client, model, task, instructions, memory_text, verbose=verbose)
-        update = memory.update(task, trace, trace["correct"])
-        trace.update(run=run, condition=condition, memory_shown=memory_text, retrieved=retrieved,
-                     memory_update=update, memory_after=memory.snapshot())
+        trace.update(run=run, condition=condition, memory_shown=memory_text, retrieved=retrieved)
         traces.append(trace)
+        trace.update(memory_update=memory.update(task, trace, trace["correct"]), memory_after=memory.snapshot())
         log(f"{condition:>10} run {run:>2} {task['id']:>3}: {'correct' if trace['correct'] else 'WRONG  '}"
             f"  tools {trace['tool_calls']:>2}  {trace['label'] or ''}")
         if verbose and condition != "none":
@@ -90,8 +93,19 @@ def save_sequence(out_dir, condition, run, model, traces, started):
     return path
 
 
+def save_failed(out_dir, condition, run, model, traces, started, error):
+    """Keep the answered tasks of a failed sequence in failed/: counted by spent_usd, not by load_traces."""
+    folder = Path(out_dir) / "failed"
+    folder.mkdir(exist_ok=True)
+    path = folder / f"{condition}_run{run:02d}_{time.strftime('%Y%m%d_%H%M%S')}.json"
+    payload = {"condition": condition, "run": run, "model": model, "started_at": started, "error": error,
+               "traces": traces}
+    path.write_text(json.dumps(payload, indent=1, default=str, ensure_ascii=False))
+    return path
+
+
 def load_traces(*dirs):
-    """All traces in the given run folders, in (folder, condition, run) file order."""
+    """All traces of finished sequences in the given run folders, in (folder, condition, run) file order."""
     traces = []
     for d in dirs:
         for path in sorted(Path(d).glob("*_run*.json")):
@@ -100,7 +114,14 @@ def load_traces(*dirs):
 
 
 def spent_usd(*dirs):
-    return sum(trace_cost(t) for t in load_traces(*[d for d in dirs if Path(d).exists()]))
+    """USD over the finished and the failed sequences in the given run folders."""
+    total = 0.0
+    for d in map(Path, dirs):
+        if d.exists():
+            total += sum(trace_cost(t) for t in load_traces(d))
+            for path in sorted((d / "failed").glob("*.json")):
+                total += sum(trace_cost(t) for t in json.loads(path.read_text())["traces"])
+    return total
 
 
 def run_all(client, model, spec, out_dir, runs, conditions=CONDITIONS, task_ids=None, workers=3,
@@ -121,7 +142,13 @@ def run_all(client, model, spec, out_dir, runs, conditions=CONDITIONS, task_ids=
         if spent > budget_usd:
             raise RuntimeError(f"Budget reached: ${spent:.2f} > ${budget_usd:.2f}")
         started = time.strftime("%Y-%m-%d %H:%M:%S")
-        traces = run_sequence(client, model, spec, condition, run, task_ids=task_ids, log=log)
+        traces = []
+        try:
+            run_sequence(client, model, spec, condition, run, task_ids=task_ids, log=log, traces=traces)
+        except Exception as exc:
+            if traces:
+                save_failed(out_dir, condition, run, model, traces, started, f"{type(exc).__name__}: {exc}")
+            raise
         save_sequence(out_dir, condition, run, model, traces, started)
         acc = sum(t["correct"] for t in traces)
         log(f"saved {condition} run {run}: {acc}/{len(traces)} correct, ${sum(map(trace_cost, traces)):.4f}")
