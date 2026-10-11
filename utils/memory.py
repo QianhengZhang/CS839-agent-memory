@@ -217,10 +217,13 @@ def parse_writer_reply(text):
 
 
 def truncate_to_budget(records, max_records, max_words):
-    """Keep the first records (the writer orders them) until both limits hold."""
-    kept = list(records[:max_records])
-    while kept and memory_words(kept) > max_words:
-        kept.pop()
+    """Drop the least supported records (fewest evidence entries; ties: the earliest) until both limits hold.
+
+    The writer is not asked to rank its records, so the order alone says nothing about importance.
+    """
+    kept = list(records)
+    while kept and (len(kept) > max_records or memory_words(kept) > max_words):
+        kept.pop(min(range(len(kept)), key=lambda i: (len(kept[i]["evidence"]), i)))
     return kept
 
 

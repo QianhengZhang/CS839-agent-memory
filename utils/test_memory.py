@@ -199,8 +199,13 @@ def test_structured():
     ok &= check("structured: falls back to plain JSON without structured outputs",
                 not mem.use_schema and "text" not in client.requests[1] and mem.snapshot() == [record(2)])
 
-    ok &= check("budget: word cap drops trailing records",
+    ok &= check("budget: word cap drops records until within budget",
                 memory_words(truncate_to_budget([record(i, 40) for i in range(5)], 8, 150)) <= 150)
+    supported = dict(record(1), evidence=["T1:right", "T2:right"])
+    kept = truncate_to_budget([supported] + [record(i) for i in range(2, 11)], 8, 150)
+    ok &= check("budget: drops the least supported, earliest records first",
+                kept[0] == supported and [r["id"] for r in kept[1:]] == [f"m{i}" for i in range(4, 11)],
+                str([r["id"] for r in kept]))
     return ok
 
 
