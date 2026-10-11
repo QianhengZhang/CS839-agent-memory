@@ -193,11 +193,38 @@ def test_structured():
     ok &= check("structured: unparseable replies keep the old memory",
                 mem.snapshot() == [record(1)] and "kept the previous memory" in info["problems"])
 
-    client = StubClient([ValueError("Unsupported parameter: text.format"), writer_reply([record(2)])])
+    import httpx2
+    import openai
+    unsupported = openai.BadRequestError(
+        "Unsupported parameter: 'text.format'", body=None,
+        response=httpx2.Response(400, request=httpx2.Request("POST", "https://api.openai.com/v1/responses")))
+    client = StubClient([unsupported, writer_reply([record(2)])])
     mem = StructuredMemory(client, "stub", inst)
     mem.update(task, trace, correct=True)
     ok &= check("structured: falls back to plain JSON without structured outputs",
                 not mem.use_schema and "text" not in client.requests[1] and mem.snapshot() == [record(2)])
+    mem = StructuredMemory(StubClient([ValueError("bad format")]), "stub", inst)
+    try:
+        mem.update(task, trace, correct=True)
+        ok &= check("structured: other errors mentioning 'format' are raised, not a fallback", False)
+    except ValueError:
+        ok &= check("structured: other errors mentioning 'format' are raised, not a fallback", mem.use_schema)
+
+    old = [record(i) for i in range(1, 7)]
+    client = StubClient([writer_reply(old + [record(i) for i in range(7, 11)])] * 2)
+    mem = StructuredMemory(client, "stub", inst)
+    mem.records = [dict(r) for r in old]
+    info = mem.update(task, trace, correct=False)
+    ids = [r["id"] for r in mem.snapshot()]
+    ok &= check("structured: truncation keeps the records added in this update",
+                ids == ["m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10"], str(ids))
+    ok &= check("structured: truncation is written to the change log",
+                "dropped m1 (over budget)" in info["changes"] and "dropped m2 (over budget)" in info["changes"])
+
+    client = StubClient([writer_reply([dict(record(1), evidence="T2:wrong")])])
+    mem = StructuredMemory(client, "stub", inst)
+    mem.update(task, trace, correct=False)
+    ok &= check("structured: evidence given as a string is kept whole", mem.snapshot()[0]["evidence"] == ["T2:wrong"])
 
     ok &= check("budget: word cap drops records until within budget",
                 memory_words(truncate_to_budget([record(i, 40) for i in range(5)], 8, 150)) <= 150)

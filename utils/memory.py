@@ -16,6 +16,8 @@ import math
 import re
 from collections import Counter
 
+import openai
+
 from .agent import PRICE_PER_M_INPUT, PRICE_PER_M_OUTPUT, compact_trace, create_response, format_args
 from .tools import TOOL_SPECS
 
@@ -209,21 +211,23 @@ def parse_writer_reply(text):
             rid += "b"
         seen.add(rid)
         rtype = r["type"] if r["type"] in RECORD_TYPES else "rule"
-        evidence = [str(e) for e in (r.get("evidence") or [])][-6:]
+        evidence = r.get("evidence") or []
+        evidence = [str(e) for e in ([evidence] if isinstance(evidence, str) else evidence)][-6:]
         clean.append({"id": rid, "type": rtype, "when": str(r["when"]).strip(), "do": str(r["do"]).strip(),
                       "evidence": evidence})
     changes = [str(c) for c in data.get("changes") or []]
     return clean, changes
 
 
-def truncate_to_budget(records, max_records, max_words):
-    """Drop the least supported records (fewest evidence entries; ties: the earliest) until both limits hold.
+def truncate_to_budget(records, max_records, max_words, protect=()):
+    """Drop records until both limits hold: records whose id is not in `protect` first, then the least
+    supported (fewest evidence entries; ties: the earliest).
 
     The writer is not asked to rank its records, so the order alone says nothing about importance.
     """
     kept = list(records)
     while kept and (len(kept) > max_records or memory_words(kept) > max_words):
-        kept.pop(min(range(len(kept)), key=lambda i: (len(kept[i]["evidence"]), i)))
+        kept.pop(min(range(len(kept)), key=lambda i: (kept[i]["id"] in protect, len(kept[i]["evidence"]), i)))
     return kept
 
 
@@ -268,8 +272,8 @@ class StructuredMemory:
                                          "schema": WRITER_SCHEMA, "strict": True}}
         try:
             response = create_response(self.client, **kwargs)
-        except Exception as exc:  # e.g. a proxy without structured outputs: fall back to plain JSON
-            if not self.use_schema or "format" not in str(exc).lower():
+        except openai.BadRequestError as exc:  # e.g. a proxy without structured outputs: fall back to plain JSON
+            if not self.use_schema or not any(s in str(exc) for s in ("text.format", "json_schema", "response_format")):
                 raise
             self.use_schema = False
             kwargs.pop("text")
@@ -312,8 +316,12 @@ class StructuredMemory:
         if records is None:
             info["problems"].append("kept the previous memory")
         else:
-            trimmed = truncate_to_budget(records, self.max_records, self.max_words)
-            info["budget_truncated"] = len(trimmed) < len(records)
+            before = {r["id"]: r for r in self.records}
+            fresh = {r["id"] for r in records if before.get(r["id"]) != r}  # added or changed in this update
+            trimmed = truncate_to_budget(records, self.max_records, self.max_words, protect=fresh)
+            dropped = [r["id"] for r in records if r not in trimmed]
+            info["budget_truncated"] = bool(dropped)
+            info["changes"] += [f"dropped {rid} (over budget)" for rid in dropped]
             self.records = trimmed
         info.update(memory_calls=usage["calls"], memory_input_tokens=usage["input_tokens"],
                     memory_output_tokens=usage["output_tokens"],

@@ -47,7 +47,8 @@ def load_env(start=None):
 def make_client():
     from openai import OpenAI
     # Anaconda's old brotli breaks httpx's decoder; gzip/deflate avoids it (as in the course notebooks).
-    return OpenAI(default_headers={"Accept-Encoding": "gzip, deflate"})
+    # agent.create_response does the retrying, so the client's own retries are off.
+    return OpenAI(default_headers={"Accept-Encoding": "gzip, deflate"}, max_retries=0)
 
 
 def sequence_path(out_dir, condition, run):
