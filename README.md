@@ -59,3 +59,9 @@ python -m utils.experiment --out runs/memory_main --runs 1-5
 ```
 
 Finished (condition, run) files are skipped, so an interrupted experiment resumes.
+
+## Results (Oct 11, 10 runs per condition, $0.86 in total)
+
+Correct out of 120: no memory 71, episodic 62, structured 74. Per task: `results/summary_by_task.csv` and
+`figures/success_by_task.png`; cost per condition: `results/cost_by_condition.csv`. Memory snapshots, the final
+structured memories, the two trajectories and the findings are in `hw1_memory.ipynb` (sections 10–14).
