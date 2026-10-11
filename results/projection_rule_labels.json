@@ -1,0 +1,457 @@
+{
+ "_about": "Hand labels for every structured-memory record whose 'do' text mentions EPSG:5070 or EPSG:3857, in both experiments. 5070 = recommends EPSG:5070 for area or density (including 'unless another projection is requested' and hedged 'likely use'); 3857 = keeps the EPSG:3857 default; consistency = only says to use one projection consistently; geodesic = a distance rule.",
+ "labels": [
+  {
+   "do": "Build the exact 50-state name list from list_regions codes; call get_density for all 50 without limit, then rank returned values. Use default EPSG:3857 unless specified.",
+   "label": "3857"
+  },
+  {
+   "do": "Call distance with method=\"geodesic\"; do not rely on the tool's planar EPSG:3857 default, especially for widely separated regions.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Call get_area with exact identified names and requested projection for every region; do not substitute external area figures. Default is EPSG:3857.",
+   "label": "3857"
+  },
+  {
+   "do": "Call get_area with the exact identified names (and requested projection) for every region; do not substitute external or familiar area figures. The default is EPSG:3857.",
+   "label": "3857"
+  },
+  {
+   "do": "Call get_area with the exact identified names and requested projection for every region; do not substitute external area figures. Default is EPSG:3857.",
+   "label": "3857"
+  },
+  {
+   "do": "Call get_density(names=\"all\", projection=\"EPSG:5070\", order=\"desc\", limit=100), then exclude District of Columbia, Puerto Rico, and other nonstates before selecting the requested number.",
+   "label": "5070"
+  },
+  {
+   "do": "Check projection; use EPSG:5070 for equal-area results and state the projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Check the projection convention; use EPSG:5070 when an equal-area result is expected, and state the projection used rather than relying on EPSG:3857.",
+   "label": "5070"
+  },
+  {
+   "do": "Choose the projection explicitly; use EPSG:5070 for geographic area comparisons unless another projection is requested.",
+   "label": "5070"
+  },
+  {
+   "do": "Confirm whether the request means states or all regions; obtain each ranking independently and compare names. Use EPSG:5070 for area.",
+   "label": "5070"
+  },
+  {
+   "do": "Do not assume EPSG:3857 is the reviewer's intended density basis; likely use EPSG:5070 (Albers Equal Area) for state area/density rankings and state the projection explicitly.",
+   "label": "5070"
+  },
+  {
+   "do": "Do not rank names=\"all\" blindly; restrict to the 50 states before selecting requested ranks. Use the default EPSG:3857 unless the request specifies another projection.",
+   "label": "3857"
+  },
+  {
+   "do": "Do not rank names=\"all\" blindly; restrict to the 50 states before selecting the requested ranks. Use the default EPSG:3857 unless the request specifies another projection.",
+   "label": "3857"
+  },
+  {
+   "do": "Explicitly choose the area projection; use EPSG:5070 for geographic area comparisons unless the request specifies another projection. Query every reported region with that projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Explicitly use get_area(..., projection=\"EPSG:5070\"); the default EPSG:3857 can change area rankings. Restrict to the requested regions before sorting.",
+   "label": "5070"
+  },
+  {
+   "do": "Get 50-state population and area totals, calculate total population/total area, double it, then query get_density with strict greater_than; use EPSG:5070.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely avoid relying on default EPSG:3857; explicitly use the intended equal-area projection, EPSG:5070, when calculating or retrieving density, and restrict names to the 50 states.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (Albers Equal Area) rather than default EPSG:3857, and state the projection explicitly.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (equal-area Albers) rather than default EPSG:3857; restrict the requested universe.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (equal-area Albers) rather than the default EPSG:3857; restrict the requested universe.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (equal-area) for comparable area and density values rather than the EPSG:3857 default; state the projection and units in the answer.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (equal-area) instead of EPSG:3857; state projection and units.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (equal-area) instead of the EPSG:3857 default; state projection and units.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (equal-area) rather than EPSG:3857, explicitly pass the 50 state names, then rank the returned densities.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070 (equal-area) rather than the default EPSG:3857, explicitly pass the 50 state names, then rank the returned densities.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070, the equal-area projection, and report it when relevant.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070, the equal-area projection, rather than default EPSG:3857; explicitly pass the projection and report it when relevant.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070, the equal-area projection, rather than default EPSG:3857; report the projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use EPSG:5070, the equal-area projection. For overall density, divide summed population by summed area rather than averaging state densities.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use distance method=\"geodesic\" for ordinary inter-region distance; do not accept the default planar EPSG:3857 result, especially for Alaska or other large separations.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Likely use distance with method=\"geodesic\" rather than default planar EPSG:3857, since ordinary distance in km usually means surface distance; state the method.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Likely use distance(method=\"geodesic\") rather than the default planar EPSG:3857, whose latitude distortion can greatly overstate distances.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Likely use exact 50 states and projection=\"EPSG:5070\" explicitly; use order and limit, and verify count when appropriate.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use get_area with projection EPSG:5070 (equal-area), explicitly restrict state requests to the 50 states, then use order and limit.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use get_density or get_area with projection=\"EPSG:5070\" (equal-area Albers), rather than relying on the EPSG:3857 default; restrict to the requested state/region universe before ranking.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use get_density with projection=\"EPSG:5070\" explicitly for geographic area comparisons, rather than relying on the EPSG:3857 default; restrict to the exact 50 state names and verify count=50.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use method=\"geodesic\" for ordinary earth-surface distance rather than planar EPSG:3857; apply strict distance thresholds.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Likely use method=\"geodesic\" for ordinary earth-surface distance rather than the planar EPSG:3857 default.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Likely use method=\"geodesic\" for ordinary inter-region distance; avoid default planar EPSG:3857, especially for Alaska or large separations.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Likely use method=\"geodesic\"; default planar EPSG:3857 can distort long distances.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Likely use projection=\"EPSG:5070\" for equal-area comparisons instead of the EPSG:3857 default.",
+   "label": "5070"
+  },
+  {
+   "do": "Likely use projection=\"EPSG:5070\" for equal-area comparisons rather than EPSG:3857.",
+   "label": "5070"
+  },
+  {
+   "do": "Obtain each ranking independently, confirm whether the request means states or all regions, and compare names explicitly. Use EPSG:5070 for area rankings.",
+   "label": "5070"
+  },
+  {
+   "do": "Query population and area for exactly 50 states in EPSG:5070; calculate total population/total area, double it, then use get_density with greater_than (strict).",
+   "label": "5070"
+  },
+  {
+   "do": "Restrict the query to exactly the 50 states and pass the projection explicitly to get_density; use EPSG:3857 when none is specified, and report that projection because a mismatch is a likely source of ranking/value errors.",
+   "label": "3857"
+  },
+  {
+   "do": "Restrict to the 50 states, total population and EPSG:5070 area separately, divide totals with calculator, multiply the threshold, then use get_density with strict greater_than and count results.",
+   "label": "5070"
+  },
+  {
+   "do": "Retrieve both regions' areas explicitly with get_area(names=[...]) and use one consistent projection (default EPSG:3857 unless requested otherwise); do not substitute familiar Census area figures or infer an unqueried value.",
+   "label": "3857"
+  },
+  {
+   "do": "Retrieve every requested region's area with get_area using exact names and the same projection (default EPSG:3857 unless requested). Do not substitute remembered Census or external area figures.",
+   "label": "3857"
+  },
+  {
+   "do": "Retrieve values only for the 50 state names, using projection=\"EPSG:5070\" for density or area, then use rank to sort.",
+   "label": "5070"
+  },
+  {
+   "do": "The tool default is EPSG:3857, but a rejected result may indicate the task expects EPSG:5070; check the requested convention and state the projection used.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:3857 consistently for ranking and reported values; if a projection is explicitly chosen, use it throughout.",
+   "label": "3857"
+  },
+  {
+   "do": "Use EPSG:3857 consistently; use EPSG:5070 only when explicitly requested.",
+   "label": "3857"
+  },
+  {
+   "do": "Use EPSG:3857, the tool default, consistently for retrieval, ranking, and reported values; use EPSG:5070 only when requested.",
+   "label": "3857"
+  },
+  {
+   "do": "Use EPSG:5070 (Albers Equal Area) rather than Web Mercator default, because density values depend substantially on projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 (Albers Equal Area) rather than the Web Mercator default, because density values depend substantially on projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 (equal-area), explicitly pass the 50 state names, then rank returned densities with order=\"desc\" and limit as requested.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 and report the projection; verify the requested geographic scope.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 explicitly for area and density rankings unless the request specifies another projection; report that projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 explicitly for area comparisons unless the request specifies another projection; do not rely on EPSG:3857 defaults.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 explicitly unless another projection is requested; use rank for sorting.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 explicitly unless the request specifies another projection; do not rely on EPSG:3857 defaults.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 unless another projection is requested; use rank for sorting.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070 unless another projection is specified, and report the projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Use EPSG:5070; compute total population/total area, double it, then count individual density rows strictly above it. Do not use get_density.total, which sums densities.",
+   "label": "5070"
+  },
+  {
+   "do": "Use an explicit 50-state list, excluding territories and DC for rankings; use EPSG:5070 for area/density. For thresholds, retrieve reference population, filter strictly, and count rows.",
+   "label": "5070"
+  },
+  {
+   "do": "Use an explicit 50-state list, excluding territories and DC for rankings; use EPSG:5070 for area/density. For thresholds, retrieve the reference population, filter strictly, and count returned rows.",
+   "label": "5070"
+  },
+  {
+   "do": "Use an explicit 50-state list, excluding territories and DC for rankings; use EPSG:5070 for area/density. For thresholds, retrieve the reference population, filter strictly, and count rows.",
+   "label": "5070"
+  },
+  {
+   "do": "Use an explicit 50-state name list, call get_area with projection=\"EPSG:5070\", order=\"asc\" or \"desc\", and limit as requested; exclude territories and DC.",
+   "label": "5070"
+  },
+  {
+   "do": "Use an explicit 50-state name list, call get_density with projection=\"EPSG:5070\", order=\"desc\", and the requested limit; exclude territories and DC.",
+   "label": "5070"
+  },
+  {
+   "do": "Use distance method=\"geodesic\"; default planar EPSG:3857 may be inappropriate.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use distance with method=\"geodesic\" explicitly; do not rely on the default planar EPSG:3857 result, especially for widely separated regions.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use distance with method=\"geodesic\" rather than the default planar EPSG:3857.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use distance with method=\"geodesic\" rather than the planar EPSG:3857 default.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use distance with method=\"geodesic\"; do not accept the default planar EPSG:3857 distance for a general km caption.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use distance with method=\"geodesic\"; do not rely on the planar EPSG:3857 default for ordinary real-world distance.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use exact 50-state names and EPSG:5070 unless the request specifies another projection; exclude DC and territories.",
+   "label": "5070"
+  },
+  {
+   "do": "Use exact explicit 50-state names, excluding DC and territories. Filters are strict; use get_density with EPSG:5070, and rank or compare unrounded values.",
+   "label": "5070"
+  },
+  {
+   "do": "Use exactly the 50 states and EPSG:5070; compute overall density as total population / total area, apply strict thresholds, and count or rank state densities.",
+   "label": "5070"
+  },
+  {
+   "do": "Use exactly the 50 states, explicitly set projection=\"EPSG:5070\", and use order plus limit; verify the result count when appropriate.",
+   "label": "5070"
+  },
+  {
+   "do": "Use exactly the 50 states, set projection=\"EPSG:5070\", use order and limit, and verify the result count when appropriate.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area for exact state names and EPSG:5070 for comparisons unless another projection is specified; exclude DC and territories.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area for the exact state names and use EPSG:5070 (equal-area) for area comparisons unless the request explicitly specifies another projection; exclude DC and territories.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area with exact names and EPSG:5070 unless another projection is specified; exclude DC and territories.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area with exact region names and projection=\"EPSG:5070\"; Web Mercator can distort area rankings. Use EPSG:3857 only when explicitly requested.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area with projection EPSG:5070 and restrict to requested regions before sorting.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area with projection=\"EPSG:5070\" unless EPSG:3857 is explicitly requested; Web Mercator can distort area rankings.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area(..., projection=\"EPSG:5070\"); default EPSG:3857 can change rankings. Restrict to requested regions before sorting.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area(names=\"all\", order=\"desc\", limit=10, projection=\"EPSG:5070\") and compare the top area state separately with the population leader; report both areas.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_area(projection=\"EPSG:5070\") unless EPSG:3857 is requested; Web Mercator distorts area.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density with EPSG:5070 and explicit 50-state names, then rank descending.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density with projection=\"EPSG:5070\" and an exact list of the 50 state names, excluding DC and territories; sort desc and apply limit.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density with projection=\"EPSG:5070\" and restrict names to the 50 states.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density with projection=\"EPSG:5070\", order=\"asc\"; use list_regions to exclude nonstates before selecting the requested number, and report units.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density with projection=\"EPSG:5070\", order=\"desc\" or \"asc\" as requested; use list_regions to exclude nonstates before selecting the requested number, and report units.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density with projection=\"EPSG:5070\"; exclude nonstates before selecting the requested number, and report units.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density(all, projection=\"EPSG:5070\", order=\"desc\", limit=100), then exclude nonstates before selecting the requested rank.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density(projection=\"EPSG:5070\") for exactly the 50 states; sort desc and limit.",
+   "label": "5070"
+  },
+  {
+   "do": "Use get_density(projection=\"EPSG:5070\"); exclude nonstates and report people/km².",
+   "label": "5070"
+  },
+  {
+   "do": "Use method=\"geodesic\" rather than default planar EPSG:3857 for general km distances.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use method=\"geodesic\"; default planar EPSG:3857 can distort long distances. Query all, retain states within the threshold, and sum the selected states plus the origin.",
+   "label": "geodesic"
+  },
+  {
+   "do": "Use one explicit projection for all get_area calls; never mix EPSG:3857 and EPSG:5070.",
+   "label": "consistency"
+  },
+  {
+   "do": "Use one projection consistently for ranking and reported values; prefer EPSG:5070 for area rankings unless the request specifies another projection.",
+   "label": "5070"
+  },
+  {
+   "do": "Use one projection consistently for retrieval, ranking, and reporting. If unspecified, use EPSG:3857; do not mix EPSG:5070 and EPSG:3857.",
+   "label": "3857"
+  },
+  {
+   "do": "Use one projection consistently: specify the same projection for area ranking and reported values. Do not rank with EPSG:5070 and then report default EPSG:3857 values.",
+   "label": "consistency"
+  },
+  {
+   "do": "Use the default EPSG:3857 consistently for both ranking and reported areas. Do not rank with EPSG:5070 and report EPSG:3857 values.",
+   "label": "3857"
+  },
+  {
+   "do": "Use the exact 50-state list, calculate the aggregate baseline with the same EPSG:5070 area projection, then use get_density with a strict greater_than filter or rank unrounded values.",
+   "label": "5070"
+  },
+  {
+   "do": "Use the exact 50-state list, get_density for all without limit, then rank results; default EPSG:3857 unless specified.",
+   "label": "3857"
+  },
+  {
+   "do": "Use the same explicit projection for every get_area call. If ranking uses EPSG:5070, retrieve both regions with projection=\"EPSG:5070\"; never mix it with default EPSG:3857.",
+   "label": "consistency"
+  },
+  {
+   "do": "Use the same explicit projection for every get_area call. If ranking uses EPSG:5070, retrieve both regions with projection=\"EPSG:5070\"; never mix it with the default EPSG:3857.",
+   "label": "consistency"
+  },
+  {
+   "do": "Use the same projection for area ranking and reported values. If none is requested, use the tool default EPSG:3857; do not rank with EPSG:5070 and report EPSG:3857 values.",
+   "label": "3857"
+  },
+  {
+   "do": "Use the tool default EPSG:3857 consistently for both ranking and reported values. Never rank with one projection and report values from another; if a projection is explicitly chosen, use it throughout.",
+   "label": "3857"
+  },
+  {
+   "do": "Use the tool default EPSG:3857; do not substitute EPSG:5070 unless the request explicitly asks for it.",
+   "label": "3857"
+  },
+  {
+   "do": "Use the tool default projection EPSG:3857; do not substitute EPSG:5070 unless requested.",
+   "label": "3857"
+  }
+ ]
+}
