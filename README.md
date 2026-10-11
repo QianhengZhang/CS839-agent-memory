@@ -62,6 +62,7 @@ Finished (condition, run) files are skipped, so an interrupted experiment resume
 
 ## Results (Oct 11, 10 runs per condition, $0.86 in total)
 
-Correct out of 120: no memory 71, episodic 62, structured 74. Per task: `results/summary_by_task.csv` and
-`figures/success_by_task.png`; cost per condition: `results/cost_by_condition.csv`. Memory snapshots, the final
+Correct out of 120: no memory 71, episodic 62, structured 74 (overall differences not significant). Per task:
+`results/summary_by_task.csv` and `figures/success_by_task.png`; Fisher exact tests against no memory:
+`results/fisher_by_task.csv`; cost per condition: `results/cost_by_condition.csv`. Memory snapshots, the final
 structured memories, the two trajectories and the findings are in `hw1_memory.ipynb` (sections 10–14).

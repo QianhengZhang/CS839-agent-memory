@@ -105,7 +105,11 @@ def spent_usd(*dirs):
 
 def run_all(client, model, spec, out_dir, runs, conditions=CONDITIONS, task_ids=None, workers=3,
             budget_usd=3.0, budget_dirs=(), log=print):
-    """Run every missing (condition, run) sequence; stop before the budget is exceeded."""
+    """Run every missing (condition, run) sequence.
+
+    The budget is checked when each sequence starts, so with several workers the spend can pass
+    budget_usd by up to `workers` sequences (about $0.04 each).
+    """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     jobs = [(run, c) for run in runs for c in conditions if not sequence_path(out_dir, c, run).exists()]
