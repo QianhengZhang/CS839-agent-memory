@@ -31,8 +31,8 @@ python utils/test_tasks.py     # should end with ALL PASS
 python utils/test_memory.py    # should end with ALL PASS
 ```
 
-Then open `hw1_memory.ipynb` (or `hw1_no_memory.ipynb`). It reads `OPENAI_API_KEY` from a `.env` file in this
-folder or a parent folder, or asks for the team API key, and uses `gpt-5.6-luna`.
+Then open `hw1_memory.ipynb`, which reads `OPENAI_API_KEY` from a `.env` file in this folder or a parent folder
+(or asks for the team API key). `hw1_no_memory.ipynb` always asks for the key. Both use `gpt-5.6-luna`.
 
 ## Data
 
@@ -48,14 +48,16 @@ Boundaries include water inside the state line.
 ## Running the memory conditions
 
 - One run = T1 to T12 in order. Clear memory at the start of each run.
-- 5 runs per condition, conditions interleaved. Re-run no memory too.
+- 5 runs per condition, conditions interleaved. Re-run no memory too. (The Oct 11 experiment added 5 stability
+  runs, so there are 10 per condition.)
 - Never show `reference_calls` from `tasks.json` to the agent.
 - Feedback is binary: after each task the memory learns only whether the answer was correct.
 
-`hw1_memory.ipynb` runs everything; the same runs from the command line:
+`hw1_memory.ipynb` runs everything; the saved runs were made from the command line with:
 
 ```
-python -m utils.experiment --out runs/memory_main --runs 1-5
+python -m utils.experiment --out runs/memory_main --runs 1-5 --workers 6
+python -m utils.experiment --out runs/memory_main --runs 6-10 --workers 6
 ```
 
 Finished (condition, run) files are skipped, so an interrupted experiment resumes.
@@ -63,6 +65,7 @@ Finished (condition, run) files are skipped, so an interrupted experiment resume
 ## Results (Oct 11, 10 runs per condition, $0.86 in total)
 
 Correct out of 120: no memory 71, episodic 62, structured 74 (overall differences not significant). Per task:
-`results/summary_by_task.csv` and `figures/success_by_task.png`; Fisher exact tests against no memory:
-`results/fisher_by_task.csv`; cost per condition: `results/cost_by_condition.csv`. Memory snapshots, the final
+`results/summary_by_task.csv` and `figures/success_by_task.png`; Fisher exact tests against no memory, nominal and
+Holm-corrected (no per-task difference survives the correction): `results/fisher_by_task.csv`; cost per
+condition: `results/cost_by_condition.csv`. Memory snapshots, the final
 structured memories, the two trajectories and the findings are in `hw1_memory.ipynb` (sections 10–14).
