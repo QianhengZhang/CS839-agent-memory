@@ -17,7 +17,7 @@ utils/
   memory.py          the three memory conditions
   experiment.py      runs the sequences and saves one JSON file per (condition, run)
   test_memory.py     checks the memory code with a stub client, without API calls
-runs/                saved traces (memory_smoke/, memory_main/)
+runs/                saved traces: memory_smoke/, memory_main/; archive_v1_4aafee0/ (the first experiment)
 results/, figures/   tables and plots made by hw1_memory.ipynb
 ```
 
@@ -62,10 +62,13 @@ python -m utils.experiment --out runs/memory_main --runs 6-10 --workers 6
 
 Finished (condition, run) files are skipped, so an interrupted experiment resumes.
 
-## Results (Oct 11, 10 runs per condition, $0.86 in total)
+## Results (Oct 11, final code, 10 runs per condition)
 
-Correct out of 120: no memory 71, episodic 62, structured 74 (overall differences not significant). Per task:
+Correct out of 120: no memory 72, episodic 71, structured 79 (overall differences not significant). The first
+complete experiment, made before the review fixes and archived in `runs/archive_v1_4aafee0/`, gave 71, 62 and 74;
+`results/replication_by_task.csv` puts the two side by side and `results/pooled_20_runs.csv` pools them. Per task:
 `results/summary_by_task.csv` and `figures/success_by_task.png`; Fisher exact tests against no memory, nominal and
 Holm-corrected (no per-task difference survives the correction): `results/fisher_by_task.csv`; cost per
-condition: `results/cost_by_condition.csv`. Memory snapshots, the final
+condition: `results/cost_by_condition.csv`; hand labels of the stored projection rules:
+`results/projection_rule_labels.json`. Cost: $0.83 for this experiment, $1.69 with the first one. Memory snapshots, the final
 structured memories, the two trajectories and the findings are in `hw1_memory.ipynb` (sections 10–14).
