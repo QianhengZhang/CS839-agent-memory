@@ -86,7 +86,8 @@ def run_sequence(client, model, spec, condition, run, task_ids=None, verbose=Fal
 def save_sequence(out_dir, condition, run, model, traces, started):
     path = sequence_path(out_dir, condition, run)
     payload = {"condition": condition, "run": run, "model": model, "started_at": started,
-               "finished_at": time.strftime("%Y-%m-%d %H:%M:%S"), "traces": traces}
+               "finished_at": time.strftime("%Y-%m-%d %H:%M:%S"), "tasks": [t["task"] for t in traces],
+               "traces": traces}
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(payload, indent=1, default=str, ensure_ascii=False))
     tmp.replace(path)
@@ -128,14 +129,26 @@ def run_all(client, model, spec, out_dir, runs, conditions=CONDITIONS, task_ids=
             budget_usd=3.0, budget_dirs=(), log=print):
     """Run every missing (condition, run) sequence.
 
-    The budget is checked when each sequence starts, so with several workers the spend can pass
-    budget_usd by up to `workers` sequences (about $0.04 each).
+    The budget covers budget_dirs plus out_dir. It is checked when each sequence starts, so with
+    several workers the spend can pass budget_usd by up to `workers` sequences (about $0.04 each).
+    A saved sequence counts as finished only if it holds exactly the requested tasks.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    jobs = [(run, c) for run in runs for c in conditions if not sequence_path(out_dir, c, run).exists()]
+    wanted = [t["id"] for t in spec["tasks"] if not task_ids or t["id"] in task_ids]
+    jobs = []
+    for run in runs:
+        for c in conditions:
+            path = sequence_path(out_dir, c, run)
+            if not path.exists():
+                jobs.append((run, c))
+                continue
+            saved = json.loads(path.read_text())
+            tasks = saved.get("tasks") or [t["task"] for t in saved["traces"]]
+            if tasks != wanted:
+                raise ValueError(f"{path} holds tasks {tasks}, not the requested {wanted}; use another folder")
     log(f"{len(jobs)} sequences to run in {out_dir} ({len(runs) * len(conditions) - len(jobs)} already saved)")
-    budget_dirs = tuple(budget_dirs) or (out_dir,)
+    budget_dirs = tuple(dict.fromkeys(Path(d).resolve() for d in (*budget_dirs, out_dir)))
 
     def job(run, condition):
         spent = spent_usd(*budget_dirs)
@@ -180,7 +193,7 @@ def main():
     parser.add_argument("--conditions", default=",".join(CONDITIONS))
     parser.add_argument("--tasks", default=None, help="comma-separated task ids (default: all 12)")
     parser.add_argument("--workers", type=int, default=3)
-    parser.add_argument("--budget", type=float, default=3.0, help="USD over every folder in --budget-dirs")
+    parser.add_argument("--budget", type=float, default=3.0, help="USD over --out and every folder in --budget-dirs")
     parser.add_argument("--budget-dirs", default="runs/memory_smoke,runs/memory_main")
     args = parser.parse_args()
 

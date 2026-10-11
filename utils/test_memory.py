@@ -217,6 +217,20 @@ def test_failed_sequence():
                    len(errors) == 1 and load_traces(tmp) == [])
         ok &= check("failed sequence: answered tasks kept in failed/ and counted in the budget",
                     len(failed) == 1 and spent_usd(tmp) > 0)
+
+    with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as other:
+        client = StubClient(['{"state": "California", "population": 39355309}'])
+        run_all(client, "stub", SPEC, tmp, runs=[1], conditions=("none",), task_ids=["T1"], workers=1,
+                log=lambda s: None)
+        try:
+            run_all(StubClient([]), "stub", SPEC, tmp, runs=[1], conditions=("none",), workers=1, log=lambda s: None)
+            ok &= check("resume: a T1-only file is not taken as a finished full run", False)
+        except ValueError:
+            ok &= check("resume: a T1-only file is not taken as a finished full run", True)
+        errors = run_all(StubClient([]), "stub", SPEC, tmp, runs=[2], conditions=("none",), task_ids=["T1"],
+                         workers=1, budget_usd=0.0, budget_dirs=(other,), log=lambda s: None)
+        ok &= check("budget: the output folder is always counted",
+                    len(errors) == 1 and "Budget reached" in str(errors[0][1]))
     return ok
 
 
